@@ -19,15 +19,15 @@
 #include "State.h"
 #include "MenuState.h"
 //#include "HubState.h"
-//#include "PlayState.h"
+#include "PlayState.h"
 //#include "ShopState.h"
 //#include "Attachment.h"
 
 using namespace sf;
 using namespace std;
 float DEGTORAD = 0.017453f;
-const int screenW = 1920;
-const int screenH = 1080;
+const int screenW = sf::VideoMode::getDesktopMode().width;
+const int screenH = sf::VideoMode::getDesktopMode().height;
     
 sf::Text source;
 sf::Font mainGameFont;
@@ -50,18 +50,11 @@ int main() {
     menuState -> createState(game);
     stateList.push_back(menuState);
 
-    /*PlayState *playState = new PlayState;
+    PlayState *playState = new PlayState;
     playState -> createState(game);
-    stateList.push_back(playState);*/
+    stateList.push_back(playState);
 
     game->stateList = stateList;
-    
-    /*sf::Music music;
-    if (!music.openFromFile("sounds/starknightTheme.wav"))
-        return -1; // error
-    music.play();
-    music.setPlayingOffset(sf::seconds(.2f));
-    music.setLoop(true);*/
     
     while (state >= 0)
     {

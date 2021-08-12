@@ -39,7 +39,7 @@
        return absAngle;
    }
 
-   /*bool Entity::isCollide(Entity *a)
+   bool Entity::isCollideRec(Entity *a)
    {
 
    //dimensions of 
@@ -65,8 +65,8 @@
          return false;
       else
          return true;
-    }*/
-
+    }
+    
    void Entity::update(){}
 
    void Entity::draw(RenderWindow &app)

@@ -1,112 +1,117 @@
 #include "TileMap.h"
 
-    void TileMap::resetMap()
+void TileMap::createMinimap(vector<vector<int>> Map, float mapDim, float xPos, float yPos)
+{
+    map = Map;
+    rectangle.setSize(sf::Vector2f(mapDim, mapDim));
+    rectangle.setOutlineColor(sf::Color::Black);
+    rectangle.setOutlineThickness(-5);
+    rectangle.setOrigin(mapDim/2, mapDim/2);
+    rectangle.setPosition(xPos, yPos);
+    
+    playerIcon.setRadius((mapDim/map.size())/4);
+    playerIcon.setPointCount(100);
+    playerIcon.setFillColor(sf::Color::Green);
+    playerIcon.setOutlineColor(sf::Color::Black);
+    playerIcon.setOutlineThickness(2);
+    playerIcon.setOrigin(playerIcon.getRadius(),playerIcon.getRadius());
+    playerIcon.setPosition(xPos + ((map.size()/2 - 1) * (mapDim/map.size())) , yPos);
+    
+    //cout<<"\n" + to_string(sqrt(map.size())) + "\n";
+    
+    int tileXPos = xPos - mapDim/2;
+    int tileYPos = yPos - mapDim/2;
+    
+    int tileNum = 0;
+    int tileDim = mapDim/map.size();
+    TileDim = tileDim;
+    playerLoc = Vector2f(map.size() - 2,((map.size() - 1)/2));
+    cout << "\n" + to_string(playerLoc.x) + ", " + to_string(playerLoc.y) + "\n";
+    for (auto i = 0; i < map.size(); i++)
+        for (auto j = 0; j < map.size(); j++)
+        {
+            addTile((tileXPos + (i * tileDim)),(tileYPos + (j * tileDim)), tileDim, tileNum, mapDim, map[j][i], i, j); 
+            tileNum++;
+        }
+}
+    
+    void TileMap::addTile(int xTile, int yTile, int dim, int num,int mapDim, int tilePiece, int xCoord, int yCoord)
     {
-        xVel = 0;
-        yVel = 0;
-        xSpeed = 0.1;
-        ySpeed = 0.1;
-        xDir = 0;
-        yDir = 0;
-        maxSpeed = 3.5;
-    }
-
-    bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, const int* tiles, unsigned int width, 
-    unsigned int height, Entity ship, std::vector<Entity*> collidableEntities, bool movementLocked)
-    {
-        
-        memcpy(tileArray, tiles, sizeof(tileArray));
-        // load the tileset texture
-        if (!m_tileset.loadFromFile(tileset))
-            return false;
-            
-        if (movementLocked)
-            return true;
-
-        // resize the vertex array to fit the level size
-        m_vertices.setPrimitiveType(sf::Quads);
-        m_vertices.resize(width * height * 4);
-
-        // populate the vertex array, with one quad per tile
-        for (unsigned int i = 0; i < width; ++i)
-            for (unsigned int j = 0; j < height; ++j)
+        sf::RectangleShape tileRectangle;
+        tileRectangle.setSize(sf::Vector2f(dim, dim));
+        if (tilePiece == 1)
+            tileRectangle.setFillColor(sf::Color(100, 50, 100, 255));
+        else if (tilePiece == 2 or tilePiece == 4)
+        {
+            tileRectangle.setFillColor(sf::Color(255, 0, 0, 100));
+            if (tilePiece == 2)
             {
-                // get the current tile number
-                int tileNumber = tiles[i + j * width];
-
-                // find its position in the tileset texture
-                int tu = tileNumber % (m_tileset.getSize().x / tileSize.x);
-                int tv = tileNumber / (m_tileset.getSize().x / tileSize.x);
-
-                // get a pointer to the current tile's quad
-                sf::Vertex* quad = &m_vertices[(i + j * width) * 4];
-
-                // define its 4 corners 
-                               
-	        curSpeed = sqrt((xDir*xDir) + (yDir*yDir));
-	        
-	        /*for(auto i:collidableEntities)
-	        {
-                    if (ship.isCollide(&ship, i))
-                    {
-                        collision =  true;
-                        break;
-                    } else if (i == collidableEntities.back()) {
-                        collision = false;
-                        firstCollide = false;
-                    }
-                }*/
-                
-                /*if (thrust and !collision)
-	        {
-	            xDir += cos((ship.getAngle() + 90) * PI/180) * 0.001;
-                    yDir += sin((ship.getAngle() + 90) * PI/180) * 0.001;
-	            if (curSpeed > maxSpeed){
-	                xDir *= maxSpeed/curSpeed;
-	                yDir *= maxSpeed/curSpeed;}
-		} else if (backThrust and !collision) {
-		    if (curSpeed > 0){
-	                xDir *= 0.999;
-	                yDir *= 0.999;}
-		
-		} else if (collision and firstCollide == false) {
-                   xDir = -xDir * .5;
-                   yDir = -yDir * .5;
-                   firstCollide = true;
-
-		}*/
-
-                xVel = xVel + xDir;
-                yVel = yVel + yDir;                
-                
-                xPos = (i * tileSize.x) + (xVel * .01);
-                yPos = (j * tileSize.y) + (yVel * .01);
-                float xSize = ((i + 1) * tileSize.x) + (xVel * .01);
-                float ySize = ((j + 1) * tileSize.y) + (yVel * .01);
-                quad[0].position = sf::Vector2f(xPos, yPos);
-                quad[1].position = sf::Vector2f(xSize, yPos);
-                quad[2].position = sf::Vector2f(xSize, ySize);
-                quad[3].position = sf::Vector2f(xPos, ySize);
-
-                // define its 4 texture coordinates
-                quad[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
-                quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
-                quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
-                quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+                Ball ball(true, Vector2f(xCoord, yCoord));
+                ball.circle.setOrigin(ball.circle.getRadius(), ball.circle.getRadius());
+                ball.circle.setPosition(xTile + dim/2, yTile + dim/2);
+                balls.push_back(ball);
             }
-
-        return true;
+        }
+        else if (tilePiece == 3 or tilePiece == 5)
+        {
+            tileRectangle.setFillColor(sf::Color(0, 0, 255, 100));
+            if (tilePiece == 3)
+            {
+                Ball ball(false, Vector2f(xCoord, yCoord));
+                ball.circle.setOrigin(ball.circle.getRadius(), ball.circle.getRadius());
+                ball.circle.setPosition(xTile + dim/2, yTile + dim/2);
+                balls.push_back(ball);
+            }
+        }
+        tileRectangle.setOutlineColor(sf::Color::Black);
+        tileRectangle.setOutlineThickness(-2);
+        //tileRectangle.setOrigin(dim, dim);
+        tileRectangle.setPosition(xTile, yTile);
+        tileRectangles.push_back(tileRectangle);
     }
-
-    void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
+    
+    int TileMap::getTileElement(Vector2f coord)
     {
-        // apply the transform
-        states.transform *= getTransform();
-
-        // apply the tileset texture
-        states.texture = &m_tileset;
-
-        // draw the vertex array
-        target.draw(m_vertices, states);
+        return map[coord.x][coord.y];
     }
-
+    
+    bool TileMap::checkCanMove(Vector2f coord)
+    {
+        if (getTileElement(coord) != 1)
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    bool TileMap::isCollideBall(Vector2f coords, Ball ball)
+    {
+        if (coords == ball.ballLoc)
+            return true;
+        return false;
+    }
+    
+    void TileMap::updateMinimap(direction pDirection)
+    {
+        if (pDirection == up)
+            playerIcon.move(0, -TileDim);
+        else if (pDirection == down)
+            playerIcon.move(0, TileDim);
+        else if (pDirection == left)
+            playerIcon.move(-TileDim, 0);
+        else if (pDirection == right)
+            playerIcon.move(TileDim, 0);
+           
+        for (int i = 0; i < balls.size(); i++)
+        {
+            if (isCollideBall(playerLoc, balls[i]) and balls[i].pickedUp == false)
+            {
+                balls[i].pickedUp = true;
+                cout << "pickedUp";
+            }
+        }
+        
+        
+        //playerIcon.setRotation(ship.getAngle());
+        //playerIcon.setPosition(600 + (tilemap.xVel*-.001), 400 + (tilemap.yVel*-.001));
+    }

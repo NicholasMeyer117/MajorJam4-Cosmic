@@ -38,7 +38,7 @@ class Entity
    float getAngle();
    
    //checks if entity overlaps with Entity a
-   //bool isCollide(Entity *a);
+   bool isCollideRec(Entity *a);
    
    virtual void update();
 

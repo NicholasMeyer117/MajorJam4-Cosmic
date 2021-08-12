@@ -20,8 +20,7 @@ class Game
     public:
     RenderWindow app;
     enum gameState {mainMenu, hub, game, shop, settings};
-    int area = 1; //each area consists of several levels and ends with a boss
-    int level = 4;
+    int level = 1;
     int screenWidth;
     int screenHeight;
     sf::Text source;
@@ -38,12 +37,6 @@ class Game
         gameFont = font;
         screenWidth = W;
         screenHeight = H;
-        
-        /*Texture b1, b2, b3, b4;
-        b1.loadFromFile("images/cannonBullet.png");
-        bulletTextureList[0] = b1;
-        b2.loadFromFile("images/siphonBullet.png");
-        bulletTextureList[1] = b2;*/
     }
     
     void changeState();
