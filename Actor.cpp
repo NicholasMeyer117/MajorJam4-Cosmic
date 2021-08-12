@@ -21,39 +21,4 @@ float DamageMult, float FireRateMult, float BulletSpeedMult, float SpeedMult, fl
 
 }
 
-void Actor::moveActor(enum direction dir)
-{
 
-    switch(dir)
-    {
-        case up : 
-            yPos = yPos - speed;
-            break;
-        case down : 
-            yPos = yPos + speed;
-            break;
-        case right : 
-            xPos = xPos + speed;
-            break;
-        case left : 
-            xPos = xPos - speed;
-            break;
-        
-    }
-}
-
-void Actor::update()
-{
-
-    x = xPos;
-    y = yPos;
-
-
-}
-
-
-void Actor::setActorPosition(float X, float Y)
-{
-    xPos = X;
-    yPos = Y;
-}

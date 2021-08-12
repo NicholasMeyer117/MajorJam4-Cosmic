@@ -33,6 +33,9 @@ class PlayState: public State
     public:
     std::vector<Button*> buttonList;
     std::vector<Entity*> entities;
+    std::vector<Actor*> bluePlayers;
+    std::vector<Actor*> redPlayers;
+    std::vector<Actor*> allPlayers;
     
     Game *curGame;
     int screenW;
@@ -79,6 +82,21 @@ class PlayState: public State
     
     }
     
+    void updatePlayers(TileMap *map)
+    {
+        for (auto i:redPlayers)
+        {
+            map->checkActor(i);
+            if (map->isReturnBalls(i))
+            {
+                cout << "bitch";
+                curGame->redGetsPoints(i->balls);
+                map->resetBalls(i);
+                i->dropBalls();
+            }
+        }
+    }
+    
     
     int Run(sf::RenderWindow &app)
     {
@@ -92,6 +110,8 @@ class PlayState: public State
         bool performTurn = false;
         bool waiting = false;
         int tick = 0;
+        int playerScore = 0;
+        int enemyScore = 0;
         TileMap::direction pDirection;
         
         vector<vector<int>> level =
@@ -108,8 +128,16 @@ class PlayState: public State
 
         };
         
+        Actor player(true, true, Vector2f(7, 4));
+        redPlayers.push_back(&player);
+        allPlayers.push_back(&player);
+        
+        Actor blue1(false, false, Vector2f(1, 4));
+        bluePlayers.push_back(&blue1);
+        allPlayers.push_back(&blue1);
+        
         TileMap *map = new TileMap();
-        map -> createMinimap(level,screenW/4,screenW/2, screenH/2);
+        map -> createMinimap(level,screenW/4,screenW/2, screenH/2, allPlayers);
 
         while (app.isOpen())
         {
@@ -138,46 +166,46 @@ class PlayState: public State
 	   
 	     if (Keyboard::isKeyPressed(Keyboard::W) and !waiting)
 	     {
-	         cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y) + "\n";
-	         cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y - 1) + "\n\n";
-	         if(map->checkCanMove(Vector2f(map->playerLoc.x, map->playerLoc.y - 1)))
+	         cout<<"\nPlayerLoc: " + to_string(player.coords.x) + ", " + to_string(player.coords.y) + "\n";
+	         cout<<"\nPlayerLoc: " + to_string(player.coords.x) + ", " + to_string(player.coords.y - 1) + "\n\n";
+	         if(map->checkCanMove(Vector2f(player.coords.x, player.coords.y - 1)))
 	         {
 	             performTurn = true;
 	             pDirection = TileMap::direction::up; 
-	             map->playerLoc = Vector2f(map->playerLoc.x, map->playerLoc.y - 1);
+	             player.coords = Vector2f(player.coords.x, player.coords.y - 1);
 	         }
 	     }   
 	     else if (Keyboard::isKeyPressed(Keyboard::S) and !waiting)
 	     {
 	         cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y) + "\n";
 	         cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y + 1) + "\n\n";
-	         if(map->checkCanMove(Vector2f(map->playerLoc.x, map->playerLoc.y + 1)))
+	         if(map->checkCanMove(Vector2f(player.coords.x, player.coords.y + 1)))
 	         {
 	             performTurn = true;
 	             pDirection = TileMap::direction::down; 
-	             map->playerLoc = Vector2f(map->playerLoc.x, map->playerLoc.y + 1);
+	             player.coords = Vector2f(player.coords.x, player.coords.y + 1);
 	         }            
 	     }   
 	     else if (Keyboard::isKeyPressed(Keyboard::A) and !waiting)
 	     {
 	         cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y) + "\n";
 	         cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x - 1) + ", " + to_string(map->playerLoc.y) + "\n\n";
-	         if(map->checkCanMove(Vector2f(map->playerLoc.x - 1, map->playerLoc.y)))
+	         if(map->checkCanMove(Vector2f(player.coords.x - 1, player.coords.y)))
 	         {
 	             performTurn = true;
 	             pDirection = TileMap::direction::left; 
-	             map->playerLoc = Vector2f(map->playerLoc.x - 1, map->playerLoc.y);
+	             player.coords = Vector2f(player.coords.x - 1, player.coords.y);
 	         }            
 	     }     
 	     else if (Keyboard::isKeyPressed(Keyboard::D) and !waiting)
 	     {
 	         cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y) + "\n";
 	         cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x + 1) + ", " + to_string(map->playerLoc.y) + "\n\n";
-	         if(map->checkCanMove(Vector2f(map->playerLoc.x + 1, map->playerLoc.y)))
+	         if(map->checkCanMove(Vector2f(player.coords.x + 1, player.coords.y)))
 	         {
 	             performTurn = true;
 	             pDirection = TileMap::direction::right; 
-	             map->playerLoc = Vector2f(map->playerLoc.x + 1, map->playerLoc.y);
+	             player.coords = Vector2f(player.coords.x + 1, player.coords.y);
 	         }          
 	     }  
          
@@ -186,7 +214,10 @@ class PlayState: public State
                  performTurn = false;
                  waiting = true;
                  tick = 0;
+                 takeTurn();
                  map->updateMinimap(pDirection);
+                 updatePlayers(map);
+                 
                  
              }
              
@@ -206,9 +237,10 @@ class PlayState: public State
                 if (i.pickedUp == false)
                     app.draw(i.circle);
             }
-            app.draw(map->playerIcon);
+            for(auto i:(map -> playerIcons)) app.draw(i);
             
-
+            drawText("Red Team: " + std::to_string(curGame->redScore), 40, screenW - screenW/3, screenH/8, app);
+            drawText("Blue Team: " + std::to_string(curGame->blueScore), 40, screenW/5, screenH/8, app);
             app.display();
             app.clear(Color::Black);
         }

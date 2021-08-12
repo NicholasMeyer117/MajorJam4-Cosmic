@@ -25,6 +25,8 @@ class Game
     int screenHeight;
     sf::Text source;
     sf::Font gameFont;
+    int redScore = 0;
+    int blueScore = 0;
     //Character *character = new Character;
     std::vector<State*> stateList; //0=mainMenu, 1=Hub, 2=game, 3=Shop, 4=Settings)
     //std::array<Texture, 2> bulletTextureList;
@@ -41,7 +43,23 @@ class Game
     
     void changeState();
     
-    void beginLevel();
+    void beginLevel()
+    {
+        redScore = 0;
+        blueScore = 0;
+    }
+    
+    void redGetsPoints(int points)
+    {
+        cout << "Red Scores!";
+        redScore+=points;
+    }
+    
+    void blueGetsPoints(int points) 
+    {
+        cout << "Blue Scores!" + to_string(points);
+        blueScore+=points;
+    }
     
     
     

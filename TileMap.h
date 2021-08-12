@@ -8,6 +8,7 @@
 #include <math.h>
 #include <cstring>
 #include "Entity.h"
+#include "Actor.h"
 #include "Ball.h"
 //#include "TileMap.h"
 #define PI 3.14159265
@@ -20,7 +21,7 @@ class TileMap
     public:
     std::string tilemap;
     sf::RectangleShape rectangle;
-    sf::CircleShape playerIcon;
+    std::vector<CircleShape> playerIcons;
     std::vector<RectangleShape> tileRectangles;
     vector<Ball> balls;
     enum direction {up, down, left, right};
@@ -29,7 +30,7 @@ class TileMap
     Vector2f playerLoc = Vector2f(0,0); 
     
     
-    void createMinimap(vector<vector<int>> Map, float mapDim, float xPos, float yPos);
+    void createMinimap(vector<vector<int>> Map, float mapDim, float xPos, float yPos, vector<Actor*> players);
     
     void addTile(int xTile, int yTile, int dim, int num, int mapDim, int tilePiece, int xCoord, int yCoord);
     
@@ -38,6 +39,14 @@ class TileMap
     bool checkCanMove(Vector2f coord);
     
     bool isCollideBall(Vector2f coords, Ball ball);
+    
+    bool isReturnBalls(Actor *person);
+    
+    void resetBalls(Actor *person);
+    
+    void createIcons(int mapDim, int mapX, int mapY, vector<Actor*> players);
+    
+    void checkActor(Actor *person);
     
     void updateMinimap(direction pDirection);
 };

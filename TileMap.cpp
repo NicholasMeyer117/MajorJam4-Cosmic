@@ -1,6 +1,6 @@
 #include "TileMap.h"
 
-void TileMap::createMinimap(vector<vector<int>> Map, float mapDim, float xPos, float yPos)
+void TileMap::createMinimap(vector<vector<int>> Map, float mapDim, float xPos, float yPos, vector<Actor*>players)
 {
     map = Map;
     rectangle.setSize(sf::Vector2f(mapDim, mapDim));
@@ -9,13 +9,15 @@ void TileMap::createMinimap(vector<vector<int>> Map, float mapDim, float xPos, f
     rectangle.setOrigin(mapDim/2, mapDim/2);
     rectangle.setPosition(xPos, yPos);
     
-    playerIcon.setRadius((mapDim/map.size())/4);
+    createIcons(mapDim, xPos - mapDim/2, yPos - mapDim/2, players);
+    
+    /*playerIcon.setRadius((mapDim/map.size())/4);
     playerIcon.setPointCount(100);
     playerIcon.setFillColor(sf::Color::Green);
     playerIcon.setOutlineColor(sf::Color::Black);
     playerIcon.setOutlineThickness(2);
     playerIcon.setOrigin(playerIcon.getRadius(),playerIcon.getRadius());
-    playerIcon.setPosition(xPos + ((map.size()/2 - 1) * (mapDim/map.size())) , yPos);
+    playerIcon.setPosition(xPos + ((map.size()/2 - 1) * (mapDim/map.size())) , yPos);*/
     
     //cout<<"\n" + to_string(sqrt(map.size())) + "\n";
     
@@ -25,8 +27,8 @@ void TileMap::createMinimap(vector<vector<int>> Map, float mapDim, float xPos, f
     int tileNum = 0;
     int tileDim = mapDim/map.size();
     TileDim = tileDim;
-    playerLoc = Vector2f(map.size() - 2,((map.size() - 1)/2));
-    cout << "\n" + to_string(playerLoc.x) + ", " + to_string(playerLoc.y) + "\n";
+    //playerLoc = Vector2f(map.size() - 2,((map.size() - 1)/2));
+    //cout << "\n" + to_string(playerLoc.x) + ", " + to_string(playerLoc.y) + "\n";
     for (auto i = 0; i < map.size(); i++)
         for (auto j = 0; j < map.size(); j++)
         {
@@ -70,6 +72,30 @@ void TileMap::createMinimap(vector<vector<int>> Map, float mapDim, float xPos, f
         tileRectangles.push_back(tileRectangle);
     }
     
+    void TileMap::createIcons(int mapDim, int mapX, int mapY, vector<Actor*> players)
+    {   
+        for (auto i:players)
+        {
+            sf::CircleShape playerIcon;
+            playerIcon.setRadius((mapDim/map.size())/4);
+            playerIcon.setPointCount(100);
+            if (i->isPlayer)
+                playerIcon.setFillColor(sf::Color::Green);
+            else if (i->myTeam)
+                playerIcon.setFillColor(sf::Color::Red);
+            else
+                playerIcon.setFillColor(sf::Color::Blue);
+            playerIcon.setOutlineColor(sf::Color::Black);
+            playerIcon.setOutlineThickness(2);
+            playerIcon.setOrigin(playerIcon.getRadius(),playerIcon.getRadius());
+            int tileDim = mapDim/map.size();
+            playerIcon.setPosition(mapX + (i->coords.x * tileDim) + tileDim/2, mapY + (i->coords.y * tileDim) + tileDim/2);
+            //(mapX + ((map.size()/2 - 1) * (mapDim/map.size())) , mapY);
+            playerIcons.push_back(playerIcon);
+        }
+        
+    }
+    
     int TileMap::getTileElement(Vector2f coord)
     {
         return map[coord.x][coord.y];
@@ -86,31 +112,55 @@ void TileMap::createMinimap(vector<vector<int>> Map, float mapDim, float xPos, f
     
     bool TileMap::isCollideBall(Vector2f coords, Ball ball)
     {
+      
         if (coords == ball.ballLoc)
             return true;
         return false;
     }
     
-    void TileMap::updateMinimap(direction pDirection)
+    bool TileMap::isReturnBalls(Actor *person)
     {
-        if (pDirection == up)
-            playerIcon.move(0, -TileDim);
-        else if (pDirection == down)
-            playerIcon.move(0, TileDim);
-        else if (pDirection == left)
-            playerIcon.move(-TileDim, 0);
-        else if (pDirection == right)
-            playerIcon.move(TileDim, 0);
-           
+        if (map[person->coords.y][person->coords.x] == 4 and person->myTeam == true)
+            return true;
+        else if(map[person->coords.y][person->coords.x] == 5 and person->myTeam == false)
+            return true;
+        return false;
+        
+    }
+    
+    void TileMap::resetBalls(Actor *person)
+    {
+        for (auto i:person->ballList)
+            i->pickedUp = false;
+    }
+    
+    void TileMap::checkActor(Actor *person)
+    {
         for (int i = 0; i < balls.size(); i++)
         {
-            if (isCollideBall(playerLoc, balls[i]) and balls[i].pickedUp == false)
+            if (isCollideBall(person->coords, balls[i]) and balls[i].pickedUp == false and balls[i].myTeam == person->myTeam)
             {
                 balls[i].pickedUp = true;
+                person->ballList.push_back(&balls[i]);
+                person->balls++;
                 cout << "pickedUp";
             }
         }
         
+    }
+    
+    
+    void TileMap::updateMinimap(direction pDirection)
+    {
+        if (pDirection == up)
+            playerIcons[0].move(0, -TileDim);
+        else if (pDirection == down)
+            playerIcons[0].move(0, TileDim);
+        else if (pDirection == left)
+            playerIcons[0].move(-TileDim, 0);
+        else if (pDirection == right)
+            playerIcons[0].move(TileDim, 0);
+           
         
         //playerIcon.setRotation(ship.getAngle());
         //playerIcon.setPosition(600 + (tilemap.xVel*-.001), 400 + (tilemap.yVel*-.001));
