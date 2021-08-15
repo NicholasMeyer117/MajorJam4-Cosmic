@@ -20,7 +20,7 @@ class Game
     public:
     RenderWindow app;
     enum gameState {mainMenu, hub, game, shop, settings};
-    int level = 1;
+    int level = 0;
     int screenWidth;
     int screenHeight;
     sf::Text source;

@@ -1,27 +1,13 @@
-#pragma once
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <SFML/Graphics.hpp>
-#include <time.h>
-#include <list>
-#include <stdlib.h> 
-#include <math.h>
-#include <cstring>
-#include "Game.h"
-#include "State.h"
-#include "Button.h"
-
-class MenuState: public State
+class HowState: public State
 {
     public:
-    std::vector<Button*> buttonList;
     int screenW;
     int screenH;
     sf::Font gameFont;
     sf::Font spaceFont;
     sf::Text source;
     sf::Text titleText;
+    std::vector<Button*> buttonList;
     
     void createState(Game *game)
     {
@@ -36,28 +22,28 @@ class MenuState: public State
     int Run(sf::RenderWindow &app)
     {
         titleText.setFont(spaceFont);
-        titleText.setString("Cosmoball");
+        titleText.setString("How To Play");
         titleText.setCharacterSize(70);
         titleText.setFillColor(sf::Color::Black);
         sf::FloatRect textRect = titleText.getLocalBounds();
         titleText.setOrigin(textRect.left + textRect.width/2.0f, textRect.top  + textRect.height/2.0f);
         titleText.setPosition(screenW/2, screenH/8);
         
-        Button *startButton = new Button;
+        /*Button *startButton = new Button;
         startButton->createButton(screenW/2, 350, 400, 100, &gameFont, "START", 20); 
         buttonList.push_back(startButton);
         
         Button *settingsButton = new Button;
-        settingsButton->createButton(screenW/2, 500, 400, 100, &gameFont, "HOW TO PLAY", 20); 
+        settingsButton->createButton(screenW/2, 500, 400, 100, &gameFont, "SETTINGS", 20); 
         buttonList.push_back(settingsButton);
         
         Button *creditsButton = new Button;
         creditsButton->createButton(screenW/2, 650, 400, 100, &gameFont, "CREDITS", 20); 
-        buttonList.push_back(creditsButton);
+        buttonList.push_back(creditsButton);*/
         
-        Button *quitButton = new Button;
-        quitButton->createButton(screenW/2, 800, 400, 100, &gameFont, "QUIT", 20); 
-        buttonList.push_back(quitButton);
+        Button *backButton = new Button;
+        backButton->createButton(screenW/2, 800, 400, 100, &gameFont, "BACK", 20); 
+        buttonList.push_back(backButton);
         
         while (app.isOpen())
         {
@@ -82,10 +68,10 @@ class MenuState: public State
                 }
             }
             
-            if (buttonList[0]->clicked == true)
+            if (backButton->clicked == true)
             {
-                buttonList[0]->clicked = false;
-                return 1;
+                backButton->clicked = false;
+                return 0;
             
             }
 

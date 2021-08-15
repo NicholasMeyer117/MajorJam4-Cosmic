@@ -20,6 +20,7 @@
 #include "MenuState.h"
 //#include "HubState.h"
 #include "PlayState.h"
+#include "HowState.h"
 //#include "ShopState.h"
 //#include "Attachment.h"
 
@@ -53,6 +54,10 @@ int main() {
     PlayState *playState = new PlayState;
     playState -> createState(game);
     stateList.push_back(playState);
+    
+    HowState *howState = new HowState;
+    howState -> createState(game);
+    stateList.push_back(howState);
 
     game->stateList = stateList;
     

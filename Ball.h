@@ -8,9 +8,9 @@ class Ball: public Entity
     bool myTeam;
     bool pickedUp;
     sf::CircleShape circle;
-    Vector2f ballLoc = Vector2f(0,0); 
+    Vector2i ballLoc = Vector2i(0,0); 
     
-    Ball(bool MyTeam, Vector2f loc)
+    Ball(bool MyTeam, Vector2i loc)
     {
         myTeam = MyTeam;
         ballLoc = loc;

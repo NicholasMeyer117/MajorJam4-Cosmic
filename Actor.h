@@ -18,10 +18,12 @@ class Actor: public Entity
     bool myTeam;
     bool isPlayer;
     int balls = 0;
+    enum direction {up, down, left, right, hold};
+    direction dir;
     vector<Ball*> ballList;
-    Vector2f coords;
+    Vector2i coords;
     
-    Actor(bool MyTeam, bool IsPlayer, Vector2f Coords)
+    void createActor(bool MyTeam, bool IsPlayer, Vector2i Coords)
     {
         myTeam = MyTeam;
         isPlayer = IsPlayer;
@@ -31,11 +33,14 @@ class Actor: public Entity
     void dropBalls()
     {
         balls = 0;
+        ballList.clear();
     }
     
     void grabBall()
     {
         balls++;
     }
+    
+    
 
 };

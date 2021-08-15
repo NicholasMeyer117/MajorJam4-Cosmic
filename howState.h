@@ -1,38 +1,5 @@
-#pragma once
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <SFML/Graphics.hpp>
-#include <time.h>
-#include <list>
-#include <stdlib.h> 
-#include <math.h>
-#include <cstring>
-#include "Game.h"
-#include "State.h"
-#include "Button.h"
-
-class MenuState: public State
+class HowState: public State
 {
-    public:
-    std::vector<Button*> buttonList;
-    int screenW;
-    int screenH;
-    sf::Font gameFont;
-    sf::Font spaceFont;
-    sf::Text source;
-    sf::Text titleText;
-    
-    void createState(Game *game)
-    {
-        screenW = game->screenWidth;
-        screenH = game->screenHeight;
-        source = game->source;
-        spaceFont.loadFromFile("futura.ttf");
-        gameFont = game->gameFont;
-        
-    }
-    
     int Run(sf::RenderWindow &app)
     {
         titleText.setFont(spaceFont);
@@ -48,7 +15,7 @@ class MenuState: public State
         buttonList.push_back(startButton);
         
         Button *settingsButton = new Button;
-        settingsButton->createButton(screenW/2, 500, 400, 100, &gameFont, "HOW TO PLAY", 20); 
+        settingsButton->createButton(screenW/2, 500, 400, 100, &gameFont, "SETTINGS", 20); 
         buttonList.push_back(settingsButton);
         
         Button *creditsButton = new Button;
@@ -103,4 +70,3 @@ class MenuState: public State
     
         return 0;
     }
-};
