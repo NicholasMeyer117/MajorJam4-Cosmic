@@ -1,3 +1,4 @@
+#pragma once
 #include <SFML/Graphics.hpp>
 #include <math.h>
 
@@ -65,14 +66,11 @@ public:
             }
             
 
-            // update the position of the corresponding vertex
-             //m_vertices[i].position += p.velocity * elapsed.asSeconds();
              m_vertices[i * 4].position += p.velocity * elapsed.asSeconds();
              m_vertices[i * 4 + 1].position = m_vertices[i * 4].position + sf::Vector2f(size, 0);
              m_vertices[i * 4 + 2].position = m_vertices[i * 4].position + sf::Vector2f(size, size);
              m_vertices[i * 4 + 3].position = m_vertices[i * 4].position + sf::Vector2f(0, size);
 
-            // update the alpha (transparency) of the particle according to its lifetime
             float ratio = p.lifetime.asSeconds() / m_lifetime.asSeconds();
             for (int j = i * 4; j < i * 4 + 4; j++)
             { 
@@ -128,14 +126,13 @@ private:
         }
         m_particles[index].lifetime = sf::milliseconds((std::rand() % 1000) + timeAlive);
 
-        // reset the position of the corresponding vertex
         if (dontRespawn == false)
         {
             m_vertices[index].position = m_emitter;
             
             if (type == 4)
             {
-                m_emitter.y = (std::rand() % (maxH-minH));// + minH;
+                m_emitter.y = (std::rand() % (maxH-minH));
                 if (firsts > 0)
                 {
                     firsts--;

@@ -47,9 +47,7 @@
             {
                 visited[i][j] = false;
                 prev[i][j] = Vector2i(-1, -1);
-                //cout << to_string(Graph[j][i]) + " ";
             }
-            //cout << "\n";
         }
    
         visited[source.x][source.y] = true;
@@ -62,8 +60,6 @@
             Q.pop();
             if (Graph[cur.y][cur.x] == dest)
             {
-                //cout <<"Found it!\n ("+ to_string(cur.x) + "," + to_string(cur.y) + ")\n";
-            
                 endCoord.x = cur.x;
                 endCoord.y = cur.y;
                 break;
@@ -76,12 +72,16 @@
                 if (Graph[temp.y][temp.x] != 1 and visited[temp.x][temp.y] == false)
                 {
                     visited[temp.x][temp.y] = true;
-                    //level[temp.x][temp.y] = level[cur.x][cur.y] + 1
                     prev[temp.x][temp.y] = cur;
                     Q.push(temp);
                 }
             }
         }
+        if (Q.empty())
+        {
+            endCoord.x = source.x;
+            endCoord.y = source.y;
+        } 
         return prev;
     }
     
@@ -115,7 +115,6 @@
         }
         tileRectangle.setOutlineColor(sf::Color::Black);
         tileRectangle.setOutlineThickness(-2);
-        //tileRectangle.setOrigin(dim, dim);
         tileRectangle.setPosition(xTile, yTile);
         tileRectangles.push_back(tileRectangle);
     }
@@ -136,10 +135,8 @@
         vector<vector<Vector2i>> prev = BFS2D(map, 1, map.size(), map.size(), person->coords, dest, curPrev);
         while(prev[curPrev.x][curPrev.y] != person->coords)
         {
-            //cout<<"\n(" + to_string(curPrev.x) + "," + to_string(curPrev.y) + ")";
             curPrev = prev[curPrev.x][curPrev.y];
         }
-        //cout<<"\n(" + to_string(curPrev.x) + "," + to_string(curPrev.y) + ")";
         Vector2i nextDir = Vector2i(curPrev.x - person->coords.x, curPrev.y - person->coords.y);
         person->coords = curPrev;
         if (nextDir == Vector2i(-1, 0))
@@ -161,6 +158,10 @@
         {
             person->dir = Actor::direction::down;
             return down;
+        }
+        else if (nextDir == Vector2i(0, 0))
+        {
+            return hold;
         }
         
         return up;
@@ -193,7 +194,6 @@
             playerIcon.setOrigin(playerIcon.getRadius(),playerIcon.getRadius());
             int tileDim = mapDim/map.size();
             playerIcon.setPosition(mapX + (i->coords.x * tileDim) + tileDim/2, mapY + (i->coords.y * tileDim) + tileDim/2);
-            //(mapX + ((map.size()/2 - 1) * (mapDim/map.size())) , mapY);
             playerIcons.push_back(playerIcon);
         }
         
@@ -256,7 +256,6 @@
                     map[person->coords.y][person->coords.x] = 7;
                 person->ballList.push_back(&balls[i]);
                 person->balls++;
-                cout << "pickedUp";
                 break;
             }
         }
@@ -279,7 +278,6 @@
         {
             if (coord == playerLoc)
             {
-                cout << "player found!";
                 return true;
             }
             coord+=dif;
@@ -310,8 +308,5 @@
             playerIcons[num].move(TileDim, 0);
             playerIcons[num].setRotation(90);
         }
-           
-        
-        //playerIcon.setRotation(ship.getAngle());
-        //playerIcon.setPosition(600 + (tilemap.xVel*-.001), 400 + (tilemap.yVel*-.001));
+
     }

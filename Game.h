@@ -27,9 +27,8 @@ class Game
     sf::Font gameFont;
     int redScore = 0;
     int blueScore = 0;
-    //Character *character = new Character;
+    int winScore = 0;
     std::vector<State*> stateList; //0=mainMenu, 1=Hub, 2=game, 3=Shop, 4=Settings)
-    //std::array<Texture, 2> bulletTextureList;
     
     void resizeWindow();
     
@@ -51,13 +50,11 @@ class Game
     
     void redGetsPoints(int points)
     {
-        cout << "Red Scores!";
         redScore+=points;
     }
     
     void blueGetsPoints(int points) 
     {
-        cout << "Blue Scores!" + to_string(points);
         blueScore+=points;
     }
     

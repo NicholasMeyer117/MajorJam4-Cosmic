@@ -8,15 +8,25 @@ class HowState: public State
     sf::Text source;
     sf::Text titleText;
     std::vector<Button*> buttonList;
+    std::vector<CircleShape> icons;
     
     void createState(Game *game)
     {
         screenW = game->screenWidth;
         screenH = game->screenHeight;
         source = game->source;
-        spaceFont.loadFromFile("futura.ttf");
+        spaceFont.loadFromFile("pirulen.ttf");
         gameFont = game->gameFont;
         
+    }
+    
+    void drawText( const sf::String &str, const int Size, const float xposition, const float yposition, sf::RenderWindow& window)
+    {
+        source.setString(str);
+        source.setCharacterSize(Size);
+        source.setPosition(xposition,yposition);
+        source.setFillColor(Color::Black);
+        window.draw(source);
     }
     
     int Run(sf::RenderWindow &app)
@@ -29,21 +39,48 @@ class HowState: public State
         titleText.setOrigin(textRect.left + textRect.width/2.0f, textRect.top  + textRect.height/2.0f);
         titleText.setPosition(screenW/2, screenH/8);
         
-        /*Button *startButton = new Button;
-        startButton->createButton(screenW/2, 350, 400, 100, &gameFont, "START", 20); 
-        buttonList.push_back(startButton);
-        
-        Button *settingsButton = new Button;
-        settingsButton->createButton(screenW/2, 500, 400, 100, &gameFont, "SETTINGS", 20); 
-        buttonList.push_back(settingsButton);
-        
-        Button *creditsButton = new Button;
-        creditsButton->createButton(screenW/2, 650, 400, 100, &gameFont, "CREDITS", 20); 
-        buttonList.push_back(creditsButton);*/
-        
         Button *backButton = new Button;
-        backButton->createButton(screenW/2, 800, 400, 100, &gameFont, "BACK", 20); 
+        backButton->createButton(screenW/2, screenH - screenH/6, 400, 100, &gameFont, "BACK", 20); 
         buttonList.push_back(backButton);
+        
+        for (int i = 0; i < 5; i++)
+        {
+            sf::CircleShape playerIcon;
+            playerIcon.setRadius(25);
+            playerIcon.setOrigin(12.5, 12.5);
+            playerIcon.setPointCount(3);
+            playerIcon.setRotation(90);
+            playerIcon.setOutlineColor(sf::Color::Black);
+            playerIcon.setOutlineThickness(2);
+            playerIcon.setPosition(0 + screenW/32 + 100, 0 + screenH/5);
+            if (i == 0)
+            {
+                playerIcon.setFillColor(sf::Color::Green);
+            }
+            else if (i == 1)
+            {
+                playerIcon.setFillColor(sf::Color::Red);
+                playerIcon.move(220, 87);
+            }
+            else if (i == 2)
+            {
+                playerIcon.setFillColor(sf::Color::Blue);
+                playerIcon.move(180, 174);
+            }
+            else if (i == 3)
+            {
+                playerIcon.setFillColor(sf::Color::Red);
+                playerIcon.setPointCount(100);
+                playerIcon.move(245, 261);
+            }
+            else if (i == 4)
+            {
+                playerIcon.setFillColor(sf::Color::Blue);
+                playerIcon.setPointCount(105);
+                playerIcon.move(270, 348);
+            }
+            icons.push_back(playerIcon);
+        }
         
         while (app.isOpen())
         {
@@ -56,13 +93,11 @@ class HowState: public State
                 else if (event.type == sf::Event::MouseButtonPressed) 
                 {
                  
-                    std::cout << "Mouse Position on Screen: " + to_string(Mouse::getPosition(app).x) + " , " + to_string(Mouse::getPosition(app).y) << std::endl;
                     for (auto i:buttonList)
                     {
                         if (i -> visible == true and i->rect.contains(Mouse::getPosition(app).x, Mouse::getPosition(app).y) == true)
                         {
                             i->clicked = true;
-                            cout << "click!";
                         }
                     }   
                 }
@@ -82,6 +117,21 @@ class HowState: public State
                 app.draw(i->rectangle);
                 app.draw(i->buttonText);
             }
+            drawText("You:\n\n\n\nYour teammates:\n\n\n\nEnemy players:\n\n\n\n"
+            "Your teams balls:\n\n\n\nEnemy teams balls:\n\n\n\nMove: WASD\n\nStay: Space\n\nQuit: Q", 20, 0 + screenW/32, 0 + screenH/5, app);
+            drawText("Welcome to Cosmoball! The game of the future!\n\n"
+            "The objective is to score more points than the other team\n\n"
+            "by gathering the other team's balls and bringing them \n\n"
+            "to your team's goals. Each teams goals are located on their\n\n"
+            "side of the field. Balls are located around the middle. Each\n\n"
+            "player is only allowed to carry ONE BALL. Carrying more than\n\n" 
+            "one ball is CHEATING! so make sure to NEVER carry more\n\n"
+            "than one. If an enemy player spots you (in their \n\n"
+            "line of sight), you will be disqualified. The game is turn\n\n"
+            "based and the team that makes it to the specified score\n\n" 
+            "first wins the match. Good luck and DON'T CHEAT ;)\n\n", 23, 0 + screenW/4, 0 + screenH/5, app);
+            for (auto i:icons)
+                app.draw(i);
             app.draw(titleText);
             app.display();
         }

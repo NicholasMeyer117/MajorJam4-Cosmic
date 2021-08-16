@@ -14,7 +14,6 @@
 #include "Actor.h"
 #include "Game.h"
 #include "State.h"
-#include "MenuState.h"
 #include "TileMap.h"
 #include "ParticleSystem.h"
 
@@ -45,25 +44,10 @@ class PlayState: public State
     
     }
     
-    void emptyState()
-    {
-        /*buttonList.clear();
-        entities.clear();
-        collidableEntities.clear();
-        creditList.clear();
-        listButtons.clear();
-        enemyList.clear();
-        bulletList.clear();
-        enemyBulletList.clear();
-        enemySpriteList.clear();
-        bulletSpriteList.clear();*/
-    
-    }
-
     void drawText( const sf::String &str, const int Size, const float xposition, const float yposition, sf::RenderWindow& window)
     {
         source.setString(str);
-        source.setCharacterSize(Size); //only the lower cased word size is reserved. A capital S fixes that.
+        source.setCharacterSize(Size);
         source.setPosition(xposition,yposition);
         source.setFillColor(Color::White);
         window.draw(source);
@@ -74,23 +58,23 @@ class PlayState: public State
         switch(level)
         {
             case 0:
-                if (curGame->blueScore >= 5)
+                if (curGame->blueScore >= curGame->winScore)
                     return true;
-                else if (curGame->redScore  >= 5)
+                else if (curGame->redScore  >= curGame->winScore)
                     return true;
                 else
                     break;
             case 1:
-                if (curGame->blueScore >= 10)
+                if (curGame->blueScore >= curGame->winScore)
                     return true;
-                else if (curGame->redScore  >= 10)
+                else if (curGame->redScore  >= curGame->winScore)
                     return true;
                 else
                     break; 
             case 2:
-                if (curGame->blueScore >= 20)
+                if (curGame->blueScore >= curGame->winScore)
                     return true;
-                else if (curGame->redScore  >= 20)
+                else if (curGame->redScore  >= curGame->winScore)
                     return true;
                 else
                     break;   
@@ -112,6 +96,7 @@ class PlayState: public State
             {
                 curGame->redScore = 0;
                 curGame->blueScore = 0;
+                curGame->winScore = 5;
         
                 player.coords = Vector2i(7, 4);
                 redPlayers.push_back(&player);
@@ -127,6 +112,7 @@ class PlayState: public State
             {
                 curGame->redScore = 0;
                 curGame->blueScore = 0;
+                curGame->winScore = 10;
                 
                 player.coords = Vector2i(11, 1);
                 redPlayers.push_back(&player);
@@ -152,6 +138,7 @@ class PlayState: public State
             {
                 curGame->redScore = 5;
                 curGame->blueScore = 0;
+                curGame->winScore = 20;
                 
                 player.coords = Vector2i(11, 1);
                 redPlayers.push_back(&player);
@@ -199,7 +186,6 @@ class PlayState: public State
             map->checkActor(i);
             if (map->isReturnBalls(i))
             {
-                cout << "bitch";
                 curGame->redGetsPoints(i->balls);
                 map->resetBalls(i);
                 i->dropBalls();
@@ -211,12 +197,10 @@ class PlayState: public State
             if (map->checkLineOfSight(i->coords, i->dir))
                 if (player.balls > 1)
                 {
-                    cout<<"Player Caught!";
                     return true;
                 }
             if (map->isReturnBalls(i))
             {
-                cout << "bitch";
                 curGame->blueGetsPoints(i->balls);
                 map->resetBalls(i);
                 i->dropBalls();
@@ -225,21 +209,14 @@ class PlayState: public State
         return false;
     }
     
-    
-    
-    
     int Run(sf::RenderWindow &app)
     {
-	/*Texture p1,p2,p3,p4,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12;
-        p1.loadFromFile("images/triShip.png");*/
-        
-        //Sprite background(t2);
-        /*Sprite warhorse(p1);
-        playerShipSpriteList.push_back(warhorse);*/
     
         bool performTurn = false;
         bool waiting = false;
         bool caught = false;
+        bool loseCondition = false;
+        bool winGame = false;
         int tick = 0;
         int playerScore = 0;
         int enemyScore = 0;
@@ -302,13 +279,16 @@ class PlayState: public State
         };
         levels.push_back(level3);
         
-       // player = Player(true, true, Vector2i(7, 4));
+        player.createActor(true, true, Vector2i(7, 4));
         
-         player.createActor(true, true, Vector2i(7, 4));
+        sf::Music music;
+        if (!music.openFromFile("sounds/cosmoball.wav"))
+            return -1; // error
+        music.play();
+        music.setLoop(true);
         
         TileMap *map = new TileMap();
         createLevel(map);
-        //map -> createMinimap(levels[curGame->level],screenW/4,screenW/2, screenH/2, allPlayers);
 
         while (app.isOpen())
         {
@@ -319,26 +299,15 @@ class PlayState: public State
                 if (event.type == Event::Closed)
                     app.close();
                 
-                /*if (event.type == Event::KeyPressed)
-                {
-                     if (event.key.code == Keyboard::Space)
-                     {
-                   
-                     }
-             
-                 }*/
             }
-        
-            //Player Movement
 	         
 	     //Quit Game
 	     if (Keyboard::isKeyPressed(Keyboard::Q))
 	         return -1;
 	   
-	     if (Keyboard::isKeyPressed(Keyboard::W) and !waiting and !caught)
+	    //Player Movement
+	     if (Keyboard::isKeyPressed(Keyboard::W) and !waiting and !loseCondition)
 	     {
-	         //cout<<"\nPlayerLoc: " + to_string(player.coords.x) + ", " + to_string(player.coords.y) + "\n";
-	         //cout<<"\nPlayerLoc: " + to_string(player.coords.x) + ", " + to_string(player.coords.y - 1) + "\n\n";
 	         if(map->checkCanMove(Vector2i(player.coords.x, player.coords.y - 1)))
 	         {
 	             performTurn = true;
@@ -346,10 +315,8 @@ class PlayState: public State
 	             player.coords = Vector2i(player.coords.x, player.coords.y - 1);
 	         }
 	     }   
-	     else if (Keyboard::isKeyPressed(Keyboard::S) and !waiting and !caught)
+	     else if (Keyboard::isKeyPressed(Keyboard::S) and !waiting and !loseCondition)
 	     {
-	         //cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y) + "\n";
-	         //cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y + 1) + "\n\n";
 	         if(map->checkCanMove(Vector2i(player.coords.x, player.coords.y + 1)))
 	         {
 	             performTurn = true;
@@ -357,10 +324,8 @@ class PlayState: public State
 	             player.coords = Vector2i(player.coords.x, player.coords.y + 1);
 	         }            
 	     }   
-	     else if (Keyboard::isKeyPressed(Keyboard::A) and !waiting and !caught)
+	     else if (Keyboard::isKeyPressed(Keyboard::A) and !waiting and !loseCondition)
 	     {
-	         //cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y) + "\n";
-	         //cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x - 1) + ", " + to_string(map->playerLoc.y) + "\n\n";
 	         if(map->checkCanMove(Vector2i(player.coords.x - 1, player.coords.y)))
 	         {
 	             performTurn = true;
@@ -368,10 +333,8 @@ class PlayState: public State
 	             player.coords = Vector2i(player.coords.x - 1, player.coords.y);
 	         }            
 	     }     
-	     else if (Keyboard::isKeyPressed(Keyboard::D) and !waiting and !caught)
+	     else if (Keyboard::isKeyPressed(Keyboard::D) and !waiting and !loseCondition)
 	     {
-	         //cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x) + ", " + to_string(map->playerLoc.y) + "\n";
-	         //cout<<"\nPlayerLoc: " + to_string(map->playerLoc.x + 1) + ", " + to_string(map->playerLoc.y) + "\n\n";
 	         if(map->checkCanMove(Vector2i(player.coords.x + 1, player.coords.y)))
 	         {
 	             performTurn = true;
@@ -379,27 +342,39 @@ class PlayState: public State
 	             player.coords = Vector2i(player.coords.x + 1, player.coords.y);
 	         }          
 	     } 
-	     else if (Keyboard::isKeyPressed(Keyboard::Space) and !waiting and !caught)
+	     else if (Keyboard::isKeyPressed(Keyboard::Space) and !waiting and !loseCondition)
 	     {
 	         performTurn = true;
 	         pDirection = TileMap::direction::hold;
 	     }
          
-             if (performTurn and !waiting)
+             if (performTurn and !waiting and !winGame)
              {
                  performTurn = false;
                  waiting = true;
                  tick = 0;
                  map->playerLoc = player.coords;
                  map->updateMinimap(pDirection, 0);
-                 caught = updatePlayers(map);
-                 if (levelComplete(curGame->level) and curGame->blueScore < curGame->redScore)
+                 if (updatePlayers(map))
                  {
-                     curGame->level++;
-                     createLevel(map);
+                     loseCondition = true;
+                     caught = true;
                  }
-                 
-                 
+                 if (levelComplete(curGame->level))
+                 {
+                     if (curGame->blueScore < curGame->redScore and curGame->level != 2)
+                     {
+                         curGame->level++;
+                         createLevel(map);
+                     }
+                     else if (curGame->blueScore < curGame->redScore and curGame->level == 2)
+                     {
+                         winGame = true;
+                     }
+                     else
+                         loseCondition = true;
+
+                 }
              }
              
              if(waiting)
@@ -414,56 +389,75 @@ class PlayState: public State
              backParticles2.update(elapsed);
              backParticles3.update(elapsed);
              
-
-            //map->updateMinimap(*m, *p);
             app.draw(backParticles3);
             app.draw(backParticles2);
             app.draw(backParticles1);
             
-            app.draw(map -> rectangle);
-            for(auto i:(map -> tileRectangles)) app.draw(i);
-            for(auto i:map->balls)
+            if (!winGame)
             {
-                if (i.pickedUp == false)
-                    app.draw(i.circle);
-            }
-            for(auto i:(map -> playerIcons)) app.draw(i);
+                app.draw(map -> rectangle);
+                for(auto i:(map -> tileRectangles)) app.draw(i);
+                for(auto i:map->balls)
+                {
+                    if (i.pickedUp == false)
+                        app.draw(i.circle);
+                }
+                for(auto i:(map -> playerIcons)) app.draw(i);
             
-            drawText("Red Team: " + std::to_string(curGame->redScore), 40, screenW - screenW/5, screenH/8, app);
-            drawText("Blue Team: " + std::to_string(curGame->blueScore), 40, screenW/10, screenH/8, app);
-            if (curGame->level == 0)
-            {
-                drawText("Level: " + std::to_string(curGame->level) + "\n  1 v 1", 40, screenW/2 - screenW/20, 0, app);
+                drawText("Red Team: " + std::to_string(curGame->redScore), 40, screenW - screenW/3.5, screenH/8, app);
+                drawText("Blue Team: " + std::to_string(curGame->blueScore), 40, screenW/11, screenH/8, app);
+                if (curGame->level == 0)
+                {
+                    drawText("Level: " + std::to_string(curGame->level) + "\n  1 v 1", 40, screenW/2 - screenW/20, 0, app);
+                }
+                else if (curGame->level == 1)
+                {
+                    drawText("Level: " + std::to_string(curGame->level) + "\n  2 v 2", 40, screenW/2 - screenW/20, 0, app);
+                }
+                else if (curGame->level == 2)
+                {
+                    drawText("Level: " + std::to_string(curGame->level) + "\n  3 v 2\n Red +5", 40, screenW/2 - screenW/20, 0, app);
+                }
+                drawText("First to: " + std::to_string(curGame->winScore), 40, screenW/2.5, screenH -  screenH/5, app);
             }
-            else if (curGame->level == 1)
-            {
-                drawText("Level: " + std::to_string(curGame->level) + "\n  2 v 2", 40, screenW/2 - screenW/20, 0, app);
-            }
-            else if (curGame->level == 2)
-            {
-                drawText("Level: " + std::to_string(curGame->level) + "\n  3 v 2\n Red +5", 40, screenW/2 - screenW/20, 0, app);
-            }
-            if (caught)
+            if (loseCondition)
             {
                 
                 Button restartButton;
-                restartButton.createButton(screenW/2, screenH/6, 450, 100, &gameFont, "        CAUGHT!\nClick to restart level", 20); 
+                restartButton.createButton(screenW/2, screenH/6, 450, 100, &gameFont, "Your team lost!\nClick to restart level", 20); 
                 restartButton.rectangle.setOutlineColor(Color::Blue);
+                restartButton.rectangle.setOutlineThickness(10);
+                
+                if (caught)
+                    restartButton.buttonText.setString("            CAUGHT!\nClick to restart level");
+                    
+                app.draw(restartButton.rectangle);
+                app.draw(restartButton.buttonText);
+
+                if (event.type == sf::Event::MouseButtonPressed and restartButton.rect.contains(Mouse::getPosition(app).x, Mouse::getPosition(app).y))
+                {
+                    caught = false;
+                    loseCondition = false;
+                    createLevel(map);
+                }
+            }
+            if (winGame)
+            {
+                Button restartButton;
+                restartButton.createButton(screenW/2, screenH/2, 450, 100, &gameFont, "YOU WON THE GAME!\nClick to go to menu", 20); 
+                restartButton.rectangle.setOutlineColor(Color::Green);
                 restartButton.rectangle.setOutlineThickness(10);
                 app.draw(restartButton.rectangle);
                 app.draw(restartButton.buttonText);
                 
                 if (event.type == sf::Event::MouseButtonPressed and restartButton.rect.contains(Mouse::getPosition(app).x, Mouse::getPosition(app).y))
                 {
-                    caught = false;
-                    createLevel(map);
+                    return 0;
                 }
             }
             app.display();
             app.clear(Color::Black);
         }
-    
-    
     
         return -1;
     }

@@ -11,18 +11,12 @@
 #include "Entity.h"
 #include "Button.h"
 #include "Actor.h"
-//#include "Character.h"
-//#include "Enemy.h"
-//#include "DarkFighter.h"
-//#include "Bullets.h"
 #include "Game.h"
 #include "State.h"
 #include "MenuState.h"
-//#include "HubState.h"
 #include "PlayState.h"
 #include "HowState.h"
-//#include "ShopState.h"
-//#include "Attachment.h"
+#include "CreditsState.h"
 
 using namespace sf;
 using namespace std;
@@ -33,16 +27,17 @@ const int screenH = sf::VideoMode::getDesktopMode().height;
 sf::Text source;
 sf::Font mainGameFont;
 
-int main() {
+int main() 
+{
 
     srand(time(NULL));
     std::vector<State*> stateList;
     Game *game = new Game;
     int state = 0;
     
-    RenderWindow app(VideoMode(screenW, screenH), "Starknight!");
+    RenderWindow app(VideoMode(screenW, screenH), "Cosmoball!");
     app.setFramerateLimit(60);
-    mainGameFont.loadFromFile("futura.ttf");
+    mainGameFont.loadFromFile("pirulen.ttf");
     source.setFont(mainGameFont);
     
     game->startGame(screenW, screenH, source, mainGameFont);
@@ -58,6 +53,10 @@ int main() {
     HowState *howState = new HowState;
     howState -> createState(game);
     stateList.push_back(howState);
+    
+    CreditsState *creditsState = new CreditsState;
+    creditsState -> createState(game);
+    stateList.push_back(creditsState);
 
     game->stateList = stateList;
     

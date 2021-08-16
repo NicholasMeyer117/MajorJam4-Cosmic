@@ -11,6 +11,7 @@
 #include "Game.h"
 #include "State.h"
 #include "Button.h"
+#include "ParticleSystem.h"
 
 class MenuState: public State
 {
@@ -28,7 +29,7 @@ class MenuState: public State
         screenW = game->screenWidth;
         screenH = game->screenHeight;
         source = game->source;
-        spaceFont.loadFromFile("futura.ttf");
+        spaceFont.loadFromFile("pirulen.ttf");
         gameFont = game->gameFont;
         
     }
@@ -38,7 +39,7 @@ class MenuState: public State
         titleText.setFont(spaceFont);
         titleText.setString("Cosmoball");
         titleText.setCharacterSize(70);
-        titleText.setFillColor(sf::Color::Black);
+        titleText.setFillColor(sf::Color::White);
         sf::FloatRect textRect = titleText.getLocalBounds();
         titleText.setOrigin(textRect.left + textRect.width/2.0f, textRect.top  + textRect.height/2.0f);
         titleText.setPosition(screenW/2, screenH/8);
@@ -59,6 +60,11 @@ class MenuState: public State
         quitButton->createButton(screenW/2, 800, 400, 100, &gameFont, "QUIT", 20); 
         buttonList.push_back(quitButton);
         
+        ParticleSystem backParticles1(400, 20000, 10, 100, 4, Color::White, 0, screenH/8, screenH, screenW, 0);
+        ParticleSystem backParticles2(800, 20000, 10, 150, 4, Color::White, 0, screenH/8, screenH, screenW, 0, 200);
+        ParticleSystem backParticles3(400, 20000, 10, 200, 4, Color::White, 0, screenH/8, screenH, screenW, 0, 100);
+        sf::Clock clock;
+        
         while (app.isOpen())
         {
             Event event;
@@ -70,13 +76,11 @@ class MenuState: public State
                 else if (event.type == sf::Event::MouseButtonPressed) 
                 {
                  
-                    std::cout << "Mouse Position on Screen: " + to_string(Mouse::getPosition(app).x) + " , " + to_string(Mouse::getPosition(app).y) << std::endl;
                     for (auto i:buttonList)
                     {
                         if (i -> visible == true and i->rect.contains(Mouse::getPosition(app).x, Mouse::getPosition(app).y) == true)
                         {
                             i->clicked = true;
-                            cout << "click!";
                         }
                     }   
                 }
@@ -88,9 +92,35 @@ class MenuState: public State
                 return 1;
             
             }
+            else if (buttonList[1]->clicked == true)
+            {
+                buttonList[1]->clicked = false;
+                return 2;
+            
+            }
+            else if (buttonList[2]->clicked == true)
+            {
+                buttonList[2]->clicked = false;
+                return 3;
+            
+            }
+            else if (buttonList[3]->clicked == true)
+            {
+                buttonList[3]->clicked = false;
+                return -1;
+            
+            }
 
             //draw
-            app.clear(Color(255,255,255,255));
+            app.clear(Color::Black);
+            sf::Time elapsed = clock.restart();
+            backParticles1.update(elapsed);
+            backParticles2.update(elapsed);
+            backParticles3.update(elapsed);
+             
+            app.draw(backParticles3);
+            app.draw(backParticles2);
+            app.draw(backParticles1);
             for(auto i:buttonList)
             {
                 app.draw(i->rectangle);
