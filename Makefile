@@ -19,8 +19,8 @@ depends:
 	sudo apt-get -y install ${APTDEPENDENCIES}
 
 # Main executable
-cosmoball: main.o Entity.o Button.o TileMap.o
-	@$(CXX) $(CXXFLAGS) $(LDLIBS:%=-l%) -o $@ $^
+cosmoball: Entity.o Button.o TileMap.o main.o
+	@$(CXX) $(CXXFLAGS) $^ -o $@ $(LDLIBS:%=-l%)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $^
